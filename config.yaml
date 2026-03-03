@@ -1,0 +1,39 @@
+# Maritime Scraper Configuration
+
+scrapers:
+  fbx:
+    enabled: true
+    name: "Freightos Baltic Index"
+    source_url: "https://freightos.com/freight-index/baltic-index"
+    update_frequency: "daily"
+
+  unctad:
+    enabled: true
+    name: "UNCTAD Maritime Statistics"
+    source_url: "https://unctad.org/webflyer/review-maritime-transport-2024"
+    update_frequency: "annual"
+
+  ais:
+    enabled: false
+    name: "AIS Data (Placeholder)"
+    source_url: ""
+    update_frequency: "hourly"
+
+anomaly_detection:
+  z_score_threshold: 2.5
+  pct_change_threshold: 0.20  # 20% change
+  lookback_days: 30
+
+output:
+  directory: "output"
+  filename_pattern: "maritime_data_{timestamp}.json"
+  include_raw: false
+  pretty_print: true
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+fallback:
+  use_fallback_on_failure: true
+  fallback_data_file: "fallback_data.json"
