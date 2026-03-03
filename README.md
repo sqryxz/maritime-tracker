@@ -49,6 +49,69 @@ maritime_scraper/
 └── main.py           # Entry point
 ```
 
+## REST API
+
+A FastAPI server is available for programmatic access to maritime data.
+
+### Running the Server
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Start server
+uvicorn api:app --reload
+
+# Server runs on http://localhost:8000
+```
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check |
+| `/freight-rates` | GET | Current freight rates (FBX routes) |
+| `/anomalies` | GET | Detected shipping anomalies |
+| `/maritime-stats` | GET | UNCTAD maritime statistics |
+| `/full-report` | GET | Complete data with anomalies |
+
+### Query Parameters
+
+The `/anomalies` endpoint supports:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `source` | string | Filter by source (fbx, unctad) |
+| `min_severity` | string | Filter by minimum severity (low, medium, high) |
+
+### Example Usage
+
+```bash
+# Get freight rates
+curl http://localhost:8000/freight-rates
+
+# Get anomalies with minimum severity
+curl "http://localhost:8000/anomalies?min_severity=medium"
+
+# Get full report
+curl http://localhost:8000/full-report
+
+# Access Swagger docs
+# http://localhost:8000/docs
+```
+
+### Docker
+
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
 ## Requirements
 
 - Python 3.11+
