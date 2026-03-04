@@ -1,0 +1,88 @@
+{
+  "collection_timestamp": "2026-03-03T09:35:56.602549Z",
+  "sources": [
+    "Freightos Baltic Index",
+    "UNCTAD Maritime Statistics"
+  ],
+  "data": {
+    "routes": [
+      {
+        "route": "China to US West Coast",
+        "value": 2500.0,
+        "unit": "USD/FEU"
+      },
+      {
+        "route": "China to US East Coast",
+        "value": 3500.0,
+        "unit": "USD/FEU"
+      },
+      {
+        "route": "China to Rotterdam",
+        "value": 1800.0,
+        "unit": "USD/FEU"
+      },
+      {
+        "route": "Shanghai to Los Angeles",
+        "value": 2400.0,
+        "unit": "USD/FEU"
+      },
+      {
+        "route": "Shanghai to New York",
+        "value": 3600.0,
+        "unit": "USD/FEU"
+      }
+    ],
+    "indicators": [
+      {
+        "name": "World Fleet tonnage (million GT)",
+        "value": 2200.0,
+        "unit": "million GT"
+      },
+      {
+        "name": "Maritime trade volume",
+        "value": 24000.0,
+        "unit": "million tons"
+      },
+      {
+        "name": "Container port throughput",
+        "value": 900.0,
+        "unit": "million TEU"
+      },
+      {
+        "name": "Merchant fleet registrations",
+        "value": 150.0,
+        "unit": "countries"
+      },
+      {
+        "name": "Shipping share of world trade",
+        "value": 80.0,
+        "unit": "percent"
+      }
+    ]
+  },
+  "summary": {
+    "total_sources": 2,
+    "successful": 2,
+    "failed": 0
+  },
+  "anomalies": [
+    {
+      "type": "z_score",
+      "metric": "Shanghai to New York",
+      "value": 3600.0,
+      "z_score": 2.61,
+      "severity": "medium",
+      "threshold": 2.5,
+      "details": {
+        "mean": 2960.0,
+        "std": 245.36
+      }
+    }
+  ],
+  "anomaly_summary": {
+    "total_anomalies": 1,
+    "z_score_anomalies": 1,
+    "pct_change_anomalies": 0,
+    "cross_route_anomalies": 0
+  }
+}

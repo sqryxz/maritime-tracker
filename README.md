@@ -112,6 +112,90 @@ EXPOSE 8000
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
+## Sample API Responses
+
+### Freight Rates Endpoint (`/freight-rates`)
+
+```json
+{
+  "source": "fbx",
+  "timestamp": "2026-03-04T12:00:00Z",
+  "data": {
+    "index_name": "Freightos Baltic Index (FBX)",
+    "routes": [
+      {"route": "China to US West Coast", "value": 2500.0, "unit": "USD/FEU"},
+      {"route": "China to US East Coast", "value": 3500.0, "unit": "USD/FEU"},
+      {"route": "China to Rotterdam", "value": 1800.0, "unit": "USD/FEU"}
+    ]
+  },
+  "status": "success"
+}
+```
+
+### Anomalies Endpoint (`/anomalies`)
+
+```json
+{
+  "timestamp": "2026-03-04T12:00:00Z",
+  "count": 2,
+  "anomalies": [
+    {
+      "type": "z_score",
+      "metric": "Shanghai to New York",
+      "value": 3600.0,
+      "z_score": 2.61,
+      "severity": "medium",
+      "threshold": 2.5,
+      "details": {"mean": 2960.0, "std": 245.36}
+    },
+    {
+      "type": "pct_change",
+      "metric": "China to Rotterdam",
+      "value": 2200.0,
+      "pct_change": 22.2,
+      "severity": "medium",
+      "threshold": 20.0,
+      "details": {"previous_value": 1800.0, "change": 400.0}
+    }
+  ],
+  "summary": {
+    "total_anomalies": 2,
+    "z_score_anomalies": 1,
+    "pct_change_anomalies": 1,
+    "cross_route_anomalies": 0
+  }
+}
+```
+
+### Full Report Endpoint (`/full-report`)
+
+```json
+{
+  "timestamp": "2026-03-04T12:00:00Z",
+  "freight_rates": {
+    "source": "fbx",
+    "timestamp": "2026-03-04T12:00:00Z",
+    "data": {"routes": [...]},
+    "status": "success"
+  },
+  "maritime_stats": {
+    "source": "unctad",
+    "timestamp": "2026-03-04T12:00:00Z",
+    "data": {
+      "indicators": [
+        {"name": "World Fleet tonnage (million GT)", "value": 2200.0},
+        {"name": "Container port throughput", "value": 900.0, "unit": "million TEU"}
+      ]
+    },
+    "status": "success"
+  },
+  "anomalies": [...],
+  "anomaly_summary": {"total_anomalies": 1, ...}
+}
+```
+
+See `sample_output.json` for a complete example with all fields.
+
 ## Requirements
 
 - Python 3.11+
