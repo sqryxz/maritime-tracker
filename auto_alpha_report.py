@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Automated Alpha Report Generator using MiniMax LLM + Maritime MCP.
+"""Automated Alpha Report Generator using LLM + Maritime MCP.
 
 This script demonstrates AI agents consuming maritime data through MCP
-and synthesizing it into an Alpha Alert report using MiniMax LLM.
+and synthesizing it into an Alpha Alert report using an LLM.
+
+Supports: GLM (Z.ai), MiniMax, or any OpenAI-compatible API.
 """
 
 import json
@@ -19,24 +21,44 @@ OUTPUT_DIR = SCRIPT_DIR / "output"
 ALERT_TIMESTAMP = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
 
-def get_minimax_client():
-    """Initialize MiniMax client (OpenAI-compatible API)."""
-    api_key = os.environ.get("MINIMAX_API_KEY")
-    if not api_key:
-        print("WARNING: MINIMAX_API_KEY not set. Using template-based report generation.")
-        return None
+def get_llm_client():
+    """Initialize LLM client (supports GLM/Z.ai, MiniMax, or OpenAI-compatible APIs)."""
+    # Check for Z.ai first (use Coding endpoint for GLM)
+    api_key = os.environ.get("ZAI_API_KEY") or os.environ.get("GLM_API_KEY")
+    if api_key:
+        base_url = "https://api.z.ai/api/coding/paas/v4"
+        model = "glm-4.5"
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=api_key, base_url=base_url)
+            print("Using Z.ai (GLM) LLM for synthesis")
+            return client, model
+        except Exception as e:
+            print(f"Failed to initialize Z.ai client: {e}")
+            return None, None
 
-    # MiniMax uses OpenAI-compatible API
+    if not api_key:
+        # Fall back to MiniMax
+        api_key = os.environ.get("MINIMAX_API_KEY")
+        base_url = "https://api.minimax.chat/v1"
+        model = "abab6.5s-chat"
+
+    if not api_key:
+        print("WARNING: No LLM API key set (GLM_API_KEY or MINIMAX_API_KEY). Using template-based report.")
+        return None, None
+
     try:
         from openai import OpenAI
         client = OpenAI(
             api_key=api_key,
-            base_url="https://api.minimax.chat/v1"
+            base_url=base_url
         )
-        return client
+        provider = "GLM (Z.ai)" if "glm" in model else "MiniMax"
+        print(f"Using {provider} LLM for synthesis")
+        return client, model
     except Exception as e:
-        print(f"Failed to initialize MiniMax client: {e}")
-        return None
+        print(f"Failed to initialize LLM client: {e}")
+        return None, None
 
 
 def run_mcp_query(tool_name: str, arguments: dict = None) -> dict[str, Any]:
@@ -130,7 +152,7 @@ def fetch_maritime_data() -> dict[str, Any]:
     return full_report
 
 
-def synthesize_with_minimax(client, data: dict[str, Any]) -> str:
+def synthesize_with_llm(client, model: str, data: dict[str, Any]) -> str:
     """Use MiniMax to synthesize data into an Alpha Alert report.
 
     Args:
@@ -162,7 +184,7 @@ Here is the maritime data:
 Generate the Alpha Alert report in markdown format."""
 
     response = client.chat.completions.create(
-        model="abab6.5s-chat",
+        model=model,
         messages=[
             {"role": "system", "content": "You are a maritime shipping analyst. Create concise, actionable Alpha Alert reports."},
             {"role": "user", "content": prompt}
@@ -347,19 +369,19 @@ def main():
 
     # Synthesize report
     print("\n[2/4] Synthesizing Alpha Alert report...")
-    client = get_minimax_client()
+    client, model = get_llm_client()
 
     if client:
         try:
-            report = synthesize_with_minimax(client, data)
-            print("  ✓ Generated MiniMax-powered Alpha Alert")
+            report = synthesize_with_llm(client, model, data)
+            print("  ✓ Generated LLM-powered Alpha Alert")
         except Exception as e:
-            print(f"  ✗ MiniMax synthesis failed: {e}")
+            print(f"  ✗ LLM synthesis failed: {e}")
             report = generate_template_report(data)
             print("  ✓ Generated template-based Alpha Alert")
     else:
         report = generate_template_report(data)
-        print("  ✓ Generated template-based Alpha Alert (no MiniMax key)")
+        print("  ✓ Generated template-based Alpha Alert (no LLM key)")
 
     # Write output
     print("\n[3/4] Writing output files...")
